@@ -117,23 +117,23 @@ DataCallbackResult Game::onAudioReady(AudioStream *oboeStream, void *audioData, 
 
     auto *outputBuffer = static_cast<float *>(audioData);
 
-    int64_t nextClapEventMs;
+//    int64_t nextClapEventMs;
 
     for (int i = 0; i < numFrames; ++i) {
 
-        mSongPositionMs = convertFramesToMillis(
-                mCurrentFrame,
-                mAudioStream->getSampleRate());
-
-        if (mClapEvents.peek(nextClapEventMs) && mSongPositionMs >= nextClapEventMs){
-            mClap->setPlaying(true);
-            mClapEvents.pop(nextClapEventMs);
-        }
+//        mSongPositionMs = convertFramesToMillis(
+//                mCurrentFrame,
+//                mAudioStream->getSampleRate());
+//
+//        if (mClapEvents.peek(nextClapEventMs) && mSongPositionMs >= nextClapEventMs){
+//            mClap->setPlaying(true);
+//            mClapEvents.pop(nextClapEventMs);
+//        }
         mMixer.renderAudio(outputBuffer+(oboeStream->getChannelCount()*i), 1);
-        mCurrentFrame++;
+//        mCurrentFrame++;
     }
 
-    mLastUpdateTime = nowUptimeMillis();
+//    mLastUpdateTime = nowUptimeMillis();
 
     return DataCallbackResult::Continue;
 }
@@ -228,7 +228,7 @@ bool Game::setupAudioSources() {
     mBackingTrack->setLooping(true);
 
     // Add both players to a mixer
-    mMixer.addTrack(mClap.get());
+//    mMixer.addTrack(mClap.get());
     mMixer.addTrack(mBackingTrack.get());
 
     return true;

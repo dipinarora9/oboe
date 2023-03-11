@@ -16,6 +16,7 @@ package com.google.oboe.samples.liveEffect;
  */
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.media.AudioManager;
 import android.os.Build;
 
@@ -29,7 +30,7 @@ public enum LiveEffectEngine {
     }
 
     // Native methods
-    static native boolean create();
+    static native boolean create(AssetManager assetManager);
     static native boolean isAAudioRecommended();
     static native boolean setAPI(int apiType);
     static native boolean setEffectOn(boolean isEffectOn);

@@ -72,6 +72,7 @@ public:
      */
     void setNumInputBurstsCushion(int32_t numInputBurstsCushion);
 
+    std::unique_ptr<Player> mBackingTrack;
 private:
 
     // TODO add getters and setters

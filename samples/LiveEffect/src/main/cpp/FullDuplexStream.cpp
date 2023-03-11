@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+#include <LiveEffect/src/main/cpp/audio/AAssetDataSource.h>
+#include <LiveEffect/src/main/cpp/audio/Player.h>
 #include "FullDuplexStream.h"
+#include "audio/logging.h"
 
 oboe::DataCallbackResult FullDuplexStream::onAudioReady(
         oboe::AudioStream *outputStream,

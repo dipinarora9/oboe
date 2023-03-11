@@ -21,11 +21,12 @@
 #include <oboe/Oboe.h>
 #include <string>
 #include <thread>
+#include <LiveEffect/src/main/cpp/audio/Player.h>
 #include "FullDuplexPass.h"
 
 class LiveEffectEngine : public oboe::AudioStreamCallback {
 public:
-    LiveEffectEngine();
+    explicit LiveEffectEngine(AAssetManager &mAssetManager);
 
     void setRecordingDeviceId(int32_t deviceId);
     void setPlaybackDeviceId(int32_t deviceId);
@@ -52,6 +53,7 @@ public:
     bool isAAudioRecommended(void);
 
 private:
+    AAssetManager& mAssetManager;
     FullDuplexPass    mFullDuplexPass;
     bool              mIsEffectOn = false;
     int32_t           mRecordingDeviceId = oboe::kUnspecified;

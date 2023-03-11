@@ -15,14 +15,13 @@
  */
 
 #include "Player.h"
-#include "utils/logging.h"
+#include "logging.h"
 
 void Player::renderAudio(float *targetData, int32_t numFrames){
 
     const AudioProperties properties = mSource->getProperties();
 
-    if (mIsPlaying){
-
+    if (mIsPlaying) {
         int64_t framesToRenderFromData = numFrames;
         int64_t totalSourceFrames = mSource->getSize() / properties.channelCount;
         const float *data = mSource->getData();
@@ -34,7 +33,7 @@ void Player::renderAudio(float *targetData, int32_t numFrames){
         }
 
         for (int i = 0; i < framesToRenderFromData; ++i) {
-            for (int j = 0; j < 1; ++j) {
+            for (int j = 0; j < 1; ++j) { // left
                 targetData[(i*properties.channelCount)+j] = data[(mReadFrameIndex*properties.channelCount)+j];
             }
 

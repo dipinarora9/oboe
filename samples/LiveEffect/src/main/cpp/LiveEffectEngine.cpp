@@ -19,9 +19,6 @@
 
 #include "LiveEffectEngine.h"
 
-LiveEffectEngine::LiveEffectEngine() {
-    assert(mOutputChannelCount == mInputChannelCount);
-}
 
 void LiveEffectEngine::setRecordingDeviceId(int32_t deviceId) {
     mRecordingDeviceId = deviceId;
@@ -47,10 +44,12 @@ bool LiveEffectEngine::setEffectOn(bool isOn) {
         if (isOn) {
             success = openStreams() == oboe::Result::OK;
             if (success) {
+                mFullDuplexPass.mBackingTrack->setPlaying(true);
                 mFullDuplexPass.start();
                 mIsEffectOn = isOn;
             }
         } else {
+            mFullDuplexPass.mBackingTrack->setPlaying(false);
             mFullDuplexPass.stop();
             closeStreams();
             mIsEffectOn = isOn;
@@ -104,6 +103,22 @@ oboe::Result  LiveEffectEngine::openStreams() {
 
     mFullDuplexPass.setInputStream(mRecordingStream);
     mFullDuplexPass.setOutputStream(mPlayStream);
+    // Set the properties of our audio source(s) to match that of our audio stream
+    AudioProperties targetProperties {
+            .channelCount = mPlayStream->getChannelCount(),
+            .sampleRate = mPlayStream->getSampleRate()
+    };
+    // Create a data source and player for our backing track
+    std::shared_ptr<AAssetDataSource> backingTrackSource {
+            AAssetDataSource::newFromCompressedAsset(mAssetManager, kBackingTrackFilename, targetProperties)
+    };
+    if (backingTrackSource == nullptr){
+        LOGE("Could not load source data for backing track");
+    } else {
+        mFullDuplexPass.mBackingTrack = std::make_unique<Player>(backingTrackSource);
+        mFullDuplexPass.mBackingTrack->setPlaying(false);
+        mFullDuplexPass.mBackingTrack->setLooping(true);
+    }
     return result;
 }
 
@@ -120,7 +135,9 @@ oboe::AudioStreamBuilder *LiveEffectEngine::setupRecordingStreamParameters(
     // This sample uses blocking read() because we don't specify a callback
     builder->setDeviceId(mRecordingDeviceId)
         ->setDirection(oboe::Direction::Input)
-        ->setSampleRate(sampleRate)
+        ->setSampleRate(48000)
+        ->setSampleRateConversionQuality(
+            oboe::SampleRateConversionQuality::Medium)
         ->setChannelCount(mInputChannelCount);
     return setupCommonStreamParameters(builder);
 }
@@ -137,6 +154,9 @@ oboe::AudioStreamBuilder *LiveEffectEngine::setupPlaybackStreamParameters(
         ->setErrorCallback(this)
         ->setDeviceId(mPlaybackDeviceId)
         ->setDirection(oboe::Direction::Output)
+        ->setSampleRateConversionQuality(
+                    oboe::SampleRateConversionQuality::Medium)
+        ->setSampleRate(48000)
         ->setChannelCount(mOutputChannelCount);
 
     return setupCommonStreamParameters(builder);
@@ -235,4 +255,8 @@ void LiveEffectEngine::onErrorAfterClose(oboe::AudioStream *oboeStream,
     LOGE("%s stream Error after close: %s",
          oboe::convertToText(oboeStream->getDirection()),
          oboe::convertToText(error));
+}
+
+LiveEffectEngine::LiveEffectEngine(AAssetManager &mAssetManager) : mAssetManager(mAssetManager) {
+    assert(mOutputChannelCount == mInputChannelCount);
 }
